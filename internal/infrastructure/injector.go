@@ -5,6 +5,7 @@ import (
 	tb "gopkg.in/tucnak/telebot.v2"
 	"net/http"
 	"schbot/internal/config"
+	"schbot/internal/db"
 	"schbot/internal/handles"
 	"schbot/internal/interfaces"
 )
@@ -17,6 +18,7 @@ type environment struct {
 	client   *http.Client
 	bot      *tb.Bot
 	dbClient interfaces.IDBHandler
+	dbMagic  interfaces.IDbMagic
 }
 
 type IInjector interface {
@@ -30,6 +32,10 @@ func (e *environment) InjectHandles() handles.Handles {
 		Config:    e.cfg,
 		Client:    e.client,
 		DBHandler: e.dbClient,
+		DbMagic: &db.DMagic{
+			Log:    e.logger,
+			Config: e.cfg,
+		},
 	}
 }
 

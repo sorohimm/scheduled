@@ -3,7 +3,6 @@ package handles
 import (
 	"context"
 	"github.com/jackc/pgx/v4"
-	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/pkg/errors"
 	tb "gopkg.in/tucnak/telebot.v2"
 	"time"
@@ -21,7 +20,7 @@ func (h *Handles) TodayScheduleInGroup(m *tb.Message) {
 	}
 	defer conn.Release()
 
-	group, err := h.getGroup(conn, m.Chat.ID)
+	group, err := h.DbMagic.GetGroupName(conn, m.Chat.ID)
 	switch {
 	case errors.Cause(err) == pgx.ErrNoRows:
 		h.Bot.Send(m.Chat, "Группа не установлена")
@@ -54,17 +53,4 @@ func (h *Handles) TodayScheduleInGroup(m *tb.Message) {
 	if err != nil {
 		h.Log.Warn(err)
 	}
-}
-
-func (h *Handles) getGroup(conn *pgxpool.Conn, chatId int64) (string, error) {
-	const GetUserBalanceStatement = `SELECT group_name FROM chats WHERE chat_id = $1;`
-	var group string
-
-	err := conn.QueryRow(context.Background(), GetUserBalanceStatement, chatId).Scan(&group)
-	if err != nil {
-		h.Log.Info(err.Error())
-		return "", err
-	}
-
-	return group, nil
 }

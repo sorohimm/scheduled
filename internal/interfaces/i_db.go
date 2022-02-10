@@ -7,5 +7,5 @@ import (
 
 type IDBHandler interface {
 	GetPool() *pgxpool.Pool
-	AcquireConn(context.Context) (*pgxpool.Conn, error)
+	AcquireConn(ctx context.Context) (*pgxpool.Conn, error)
 }

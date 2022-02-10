@@ -23,6 +23,7 @@ type Handles struct {
 	Bot       *tb.Bot
 	Client    *http.Client
 	DBHandler interfaces.IDBHandler
+	DbMagic   interfaces.IDbMagic
 }
 
 //resolveGroup provide group name
