@@ -48,7 +48,7 @@ func (h *Handles) TodayScheduleInGroup(m *tb.Message) {
 		return
 	}
 
-	lesns := h.createTodaySchedule(sch.Lessons, int(time.Now().Weekday()), sch.IsNumeratorFirst)
+	lesns := h.createTodaySchedule(sch.Lessons, group, int(time.Now().Weekday()), sch.IsNumeratorFirst)
 	_, err = h.Bot.Send(m.Chat, lesns)
 	if err != nil {
 		h.Log.Warn(err)
