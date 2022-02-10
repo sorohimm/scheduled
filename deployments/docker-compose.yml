@@ -1,0 +1,19 @@
+version: "3.9"
+
+services:
+  app:
+    container_name: scheduld
+    build:
+      context: ./..
+      dockerfile: deployments/Dockerfile
+    env_file:
+      - ../configs/config.env
+    ports:
+      - ${APPLICATION_PORT:-8080}:8080
+    networks:
+      - network
+    restart: always
+
+networks:
+  network:
+    driver: bridge
