@@ -50,10 +50,13 @@ func main() {
 	if err != nil {
 		log.Fatal("main: inject failing")
 	}
+	log.Info("inject ok")
 	hands := injector.InjectHandles()
 
 	b.Handle("/sh", hands.GetDailySchedule)
 	b.Handle("/tsh", hands.GetTodaySchedule)
+	b.Handle("/setg", hands.SetChatGroup)
+	b.Handle("/today", hands.TodayScheduleInGroup)
 
 	b.Start()
 }

@@ -7,4 +7,6 @@ import (
 type IHandles interface {
 	GetDailySchedule(message *tb.Message)
 	GetTodaySchedule(m *tb.Message)
+	SetChatGroup(m *tb.Message)
+	TodayScheduleInGroup(m *tb.Message)
 }

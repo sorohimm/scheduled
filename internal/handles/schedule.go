@@ -9,6 +9,7 @@ import (
 	tb "gopkg.in/tucnak/telebot.v2"
 	"net/http"
 	"schbot/internal/config"
+	"schbot/internal/interfaces"
 	"schbot/internal/models"
 	"sort"
 	"strconv"
@@ -17,10 +18,11 @@ import (
 )
 
 type Handles struct {
-	Log    *zap.SugaredLogger
-	Config *config.Config
-	Bot    *tb.Bot
-	Client *http.Client
+	Log       *zap.SugaredLogger
+	Config    *config.Config
+	Bot       *tb.Bot
+	Client    *http.Client
+	DBHandler interfaces.IDBHandler
 }
 
 //resolveGroup provide group name
@@ -145,27 +147,27 @@ func (h *Handles) createDailySchedule(lessons []models.Lesson, day int) string {
 	sort.SliceStable(lessons, func(i, j int) bool {
 		return lessons[i].StartAt < lessons[j].StartAt
 	})
-	
-	var lessons_e = "\U0001F976Числитель:\n"
-	var lessons_o = "\n\U0001F975Знаменатель:\n"
+
+	var lessons_even = "\U0001F976Числитель:\n"
+	var lessons_odd = "\n\U0001F975Знаменатель:\n"
 
 	count_e := 1
 	count_o := 1
 
 	for _, lesson := range lessons {
 		if lesson.Day == day && lesson.IsNumerator {
-			lessons_e += fmt.Sprintf("%d. %s - %s (%s)\n\t%s\n\tАуд: %s\n", count_e, lesson.StartAt[:5], lesson.EndAt[:5],
+			lessons_even += fmt.Sprintf("%d. %s - %s (%s)\n\t%s\n\tАуд: %s\n", count_e, lesson.StartAt[:5], lesson.EndAt[:5],
 				lesson.Type, lesson.Name, lesson.Cabinet)
 			count_e = count_e + 1
 		}
 		if lesson.Day == day && !lesson.IsNumerator {
-			lessons_o += fmt.Sprintf("%d. %s - %s (%s)\n\t%s\n\tАуд: %s\n", count_o, lesson.StartAt[:5], lesson.EndAt[:5],
+			lessons_odd += fmt.Sprintf("%d. %s - %s (%s)\n\t%s\n\tАуд: %s\n", count_o, lesson.StartAt[:5], lesson.EndAt[:5],
 				lesson.Type, lesson.Name, lesson.Cabinet)
 			count_o = count_o + 1
 		}
 	}
 
-	return lessons_e + lessons_o
+	return lessons_even + lessons_odd
 }
 
 func (h *Handles) getSchedule(groupId string) (models.Schedule, error) {

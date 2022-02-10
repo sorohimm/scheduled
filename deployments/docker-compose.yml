@@ -13,7 +13,30 @@ services:
     networks:
       - network
     restart: always
+  postgres:
+    image: postgres:latest
+    container_name: db
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: chats_settings
+    volumes:
+      - ../assets/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - network
+    restart: always
+
+  adminer:
+      image: adminer
+      container_name: api-adminer
+      restart: always
+      ports:
+        - ${ADMINER_PORT:-17860}:8080
+      networks:
+        - network
+      depends_on:
+        - postgres
 
 networks:
-  network:
-    driver: bridge
+    network:
+      driver: bridge
