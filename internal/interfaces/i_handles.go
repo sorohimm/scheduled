@@ -5,5 +5,5 @@ import (
 )
 
 type IHandles interface {
-	GetSchedule(message *tb.Message)
+	GetDailySchedule(message *tb.Message)
 }

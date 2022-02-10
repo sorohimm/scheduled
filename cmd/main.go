@@ -35,8 +35,7 @@ func init() {
 	log.Infof("Config loaded:\n%+v", cfg)
 
 	b, err = tb.NewBot(tb.Settings{
-		URL: "https://api.telegram.org",
-
+		URL:    "https://api.telegram.org",
 		Token:  cfg.TgToken,
 		Poller: &tb.LongPoller{Timeout: 10 * time.Microsecond},
 	})
@@ -53,7 +52,7 @@ func main() {
 	}
 	hands := injector.InjectHandles()
 
-	b.Handle("/sh", hands.GetSchedule)
+	b.Handle("/sh", hands.GetDailySchedule)
 
 	b.Start()
 }
