@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"go.uber.org/zap"
 	tb "gopkg.in/tucnak/telebot.v2"
@@ -13,7 +12,6 @@ import (
 
 var (
 	cfg *config.Config
-	ctx context.Context
 	b   *tb.Bot
 	log *zap.SugaredLogger
 )
@@ -53,6 +51,8 @@ func main() {
 	log.Info("inject ok")
 	hands := injector.InjectHandles()
 
+	b.Handle("/start", hands.Start)
+	b.Handle("/help", hands.Start)
 	b.Handle("/sh", hands.GetDailySchedule)
 	b.Handle("/tsh", hands.GetTodaySchedule)
 	b.Handle("/setg", hands.SetChatGroup)
