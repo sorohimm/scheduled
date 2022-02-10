@@ -16,6 +16,12 @@ func (h *Handles) SetChatGroup(m *tb.Message) {
 	h.Log.Info(group)
 	h.Log.Info(m.Chat.ID)
 
+	_, err := h.getGroupId(group)
+	if err != nil {
+		h.Bot.Send(m.Chat, fmt.Sprintf("Группа не найдена: %s", group))
+		return
+	}
+
 	conn, err := h.DBHandler.AcquireConn(context.Background())
 	if err != nil {
 		h.Log.Info(err.Error())

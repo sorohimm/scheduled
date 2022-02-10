@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	tb "gopkg.in/tucnak/telebot.v2"
 	"net/http"
@@ -215,7 +216,7 @@ func (h *Handles) getGroupId(groupName string) (string, error) {
 	}
 
 	if res.Total == 0 {
-		return "", err
+		return "", errors.New("empty result")
 	}
 
 	var group_uuid string
