@@ -53,6 +53,7 @@ func main() {
 	hands := injector.InjectHandles()
 
 	b.Handle("/sh", hands.GetDailySchedule)
+	b.Handle("/tsh", hands.GetTodaySchedule)
 
 	b.Start()
 }

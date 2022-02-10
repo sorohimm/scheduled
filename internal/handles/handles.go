@@ -10,8 +10,10 @@ import (
 	"net/http"
 	"schbot/internal/config"
 	"schbot/internal/models"
+	"sort"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type Handles struct {
@@ -24,24 +26,56 @@ type Handles struct {
 //resolveGroup provide group name
 func (h *Handles) resolveGroup(msg string) string {
 	scanner := bufio.NewScanner(strings.NewReader(msg))
-	scanner.Scan()
-	scanner.Scan()
+	for i := 0; i < 2; i++ {
+		scanner.Scan()
+	}
 	return scanner.Text()
 }
 
 //resolveDay provide day of week
 func (h *Handles) resolveDay(msg string) int64 {
 	scanner := bufio.NewScanner(strings.NewReader(msg))
-	scanner.Scan()
-	scanner.Scan()
-	scanner.Scan()
+	for i := 0; i < 3; i++ {
+		scanner.Scan()
+	}
 	day, _ := strconv.ParseInt(scanner.Text(), 10, 32)
 	return day
+}
+
+func (h *Handles) GetTodaySchedule(m *tb.Message) {
+	group := h.resolveGroup(m.Text)
+	h.Log.Info(group)
+	h.Log.Info(m.Chat.ID)
+
+	id, err := h.getGroupId(group)
+	if err != nil {
+		_, err = h.Bot.Send(m.Chat, "Нет такой группы, сори(")
+		if err != nil {
+			h.Log.Warn(err)
+		}
+		return
+	}
+
+	sch, err := h.getSchedule(id)
+	if err != nil {
+		_, err = h.Bot.Send(m.Chat, "Бот утонул")
+		if err != nil {
+			h.Log.Warn(err)
+		}
+		return
+	}
+
+	lesns := h.createTodaySchedule(sch.Lessons, int(time.Now().Weekday()), sch.IsNumeratorFirst)
+	_, err = h.Bot.Send(m.Chat, lesns)
+	if err != nil {
+		h.Log.Warn(err)
+	}
 }
 
 func (h *Handles) GetDailySchedule(m *tb.Message) {
 	group := h.resolveGroup(m.Text)
 	h.Log.Info(group)
+	h.Log.Info(m.Chat.ID)
 
 	day := h.resolveDay(m.Text)
 	if day > 7 || day < 1 {
@@ -54,7 +88,6 @@ func (h *Handles) GetDailySchedule(m *tb.Message) {
 	}
 
 	id, err := h.getGroupId(group)
-	h.Log.Info(id)
 	if err != nil {
 		_, err = h.Bot.Send(m.Chat, "Нет такой группы, сори(")
 		if err != nil {
@@ -79,21 +112,55 @@ func (h *Handles) GetDailySchedule(m *tb.Message) {
 	}
 }
 
+func (h *Handles) createTodaySchedule(lessons []models.Lesson, day int, is_numerator bool) string {
+	sort.SliceStable(lessons, func(i, j int) bool {
+		return lessons[i].StartAt < lessons[j].StartAt
+	})
+
+	var lessonsstr string
+
+	count := 1
+	if is_numerator {
+		for _, lesson := range lessons {
+			if lesson.Day == day && lesson.IsNumerator {
+				lessonsstr += fmt.Sprintf("%d. %s - %s (%s)\n\t%s\n\tАуд: %s\n", count, lesson.StartAt[:5], lesson.EndAt[:5],
+					lesson.Type, lesson.Name, lesson.Cabinet)
+				count = count + 1
+			}
+		}
+	} else {
+		for _, lesson := range lessons {
+			if lesson.Day == day && !lesson.IsNumerator {
+				lessonsstr += fmt.Sprintf("%d. %s - %s (%s)\n\t%s\n\tАуд: %s\n", count, lesson.StartAt[:5], lesson.EndAt[:5],
+					lesson.Type, lesson.Name, lesson.Cabinet)
+				count = count + 1
+			}
+		}
+	}
+
+	return lessonsstr
+}
+
 func (h *Handles) createDailySchedule(lessons []models.Lesson, day int) string {
+	sort.SliceStable(lessons, func(i, j int) bool {
+		return lessons[i].StartAt < lessons[j].StartAt
+	})
+	
 	var lessons_e = "\U0001F976Числитель:\n"
 	var lessons_o = "\n\U0001F975Знаменатель:\n"
 
 	count_e := 1
 	count_o := 1
+
 	for _, lesson := range lessons {
 		if lesson.Day == day && lesson.IsNumerator {
-			lessons_e += fmt.Sprintf("%d. %s - %s\n\t%s\n\tАуд: %s\n", count_e, lesson.StartAt[:5], lesson.EndAt[:5],
-				lesson.Name, lesson.Cabinet)
+			lessons_e += fmt.Sprintf("%d. %s - %s (%s)\n\t%s\n\tАуд: %s\n", count_e, lesson.StartAt[:5], lesson.EndAt[:5],
+				lesson.Type, lesson.Name, lesson.Cabinet)
 			count_e = count_e + 1
 		}
 		if lesson.Day == day && !lesson.IsNumerator {
-			lessons_o += fmt.Sprintf("%d. %s - %s\n\t%s\n\tАуд: %s\n", count_o, lesson.StartAt[:5], lesson.EndAt[:5],
-				lesson.Name, lesson.Cabinet)
+			lessons_o += fmt.Sprintf("%d. %s - %s (%s)\n\t%s\n\tАуд: %s\n", count_o, lesson.StartAt[:5], lesson.EndAt[:5],
+				lesson.Type, lesson.Name, lesson.Cabinet)
 			count_o = count_o + 1
 		}
 	}
