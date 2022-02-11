@@ -1,0 +1,12 @@
+[Unit]
+Description=Telegram bot for retrieving schedules from BMSTU Bitop API
+Requires=postgresql.service
+After=postgresql.service
+
+[Service]
+Type=simple
+EnvironmentFile=/etc/scheduled.conf
+ExecStart=/usr/bin/scheduled
+
+[Install]
+WantedBy=multi-user.target

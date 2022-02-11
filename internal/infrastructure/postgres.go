@@ -22,7 +22,6 @@ func InitPostgresClient(cfg *config.Config) (interfaces.IDBHandler, error) {
 		log.Print(err)
 		return nil, errors.Wrap(err, "postgres init")
 	}
-
 	return &PostgresClient{Pool: pool}, nil
 }
 

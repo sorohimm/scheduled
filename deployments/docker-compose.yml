@@ -7,7 +7,7 @@ services:
       context: ./..
       dockerfile: deployments/Dockerfile
     env_file:
-      - ../configs/config.env
+      - /etc/scheduled.conf
     ports:
       - ${APPLICATION_PORT:-8080}:8080
     networks:
