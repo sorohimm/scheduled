@@ -1,5 +1,7 @@
 [Unit]
 Description=Telegram bot for retrieving schedules from BMSTU Bitop API
+Requires=postgresql.service
+After=postgresql.service
 
 [Service]
 Type=simple
