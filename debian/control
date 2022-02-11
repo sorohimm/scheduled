@@ -1,0 +1,12 @@
+Source: scheduled
+Maintainer: Anton Klimanov <klimanov625@outlook.com>
+Section: misc
+Priority: optional
+Standards-Version: 3.9.2
+Build-Depends: debhelper (>= 9), golang (>=1.13)
+
+Package: scheduled
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Throw schedule to Telegram chat
+ BMSTU schedule thrower. Very generic and boring

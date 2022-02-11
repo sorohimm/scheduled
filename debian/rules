@@ -1,0 +1,7 @@
+#!/usr/bin/make -f
+
+%:
+	dh $@
+
+override_dh_auto_install:
+	./scripts/build.sh $$(pwd)/debian/scheduled /usr 1.0
