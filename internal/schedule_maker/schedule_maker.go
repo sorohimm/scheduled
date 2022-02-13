@@ -13,19 +13,19 @@ type ScheduleMaker struct {
 	Log *zap.SugaredLogger
 }
 
-func (m *ScheduleMaker) CreateTodaySchedule(lessons []models.Lesson, group string, day int, is_numerator bool) string {
+func (m *ScheduleMaker) CreateTodaySchedule(lessons []models.Lesson, group string, day int, isNumerator bool) string {
 	sort.SliceStable(lessons, func(i, j int) bool {
 		return lessons[i].StartAt < lessons[j].StartAt
 	})
 
-	var lessonsstr = fmt.Sprintf("Группа %s. %s %s\n", group, m.dayOfWeekRus(time.Now().Weekday()), m.currentDate())
+	var lessonsString = fmt.Sprintf("Группа %s. %s %s\n", group, m.dayOfWeekRus(time.Now().Weekday()), m.currentDate())
 
 	count := 0
-	if is_numerator {
+	if isNumerator {
 		for _, lesson := range lessons {
 			if lesson.Day == day && lesson.IsNumerator {
 				count += 1
-				lessonsstr += fmt.Sprintf("%d. %s - %s (%s)\n\t%s\n\tАуд: %s\n", count, lesson.StartAt[:5], lesson.EndAt[:5],
+				lessonsString += fmt.Sprintf("%d. %s - %s (%s)\n\t%s\n\tАуд: %s\n", count, lesson.StartAt[:5], lesson.EndAt[:5],
 					lesson.Type, lesson.Name, lesson.Cabinet)
 			}
 		}
@@ -33,39 +33,39 @@ func (m *ScheduleMaker) CreateTodaySchedule(lessons []models.Lesson, group strin
 		for _, lesson := range lessons {
 			if lesson.Day == day && !lesson.IsNumerator {
 				count += 1
-				lessonsstr += fmt.Sprintf("%d. %s - %s (%s)\n\t%s\n\tАуд: %s\n", count, lesson.StartAt[:5], lesson.EndAt[:5],
+				lessonsString += fmt.Sprintf("%d. %s - %s (%s)\n\t%s\n\tАуд: %s\n", count, lesson.StartAt[:5], lesson.EndAt[:5],
 					lesson.Type, lesson.Name, lesson.Cabinet)
 			}
 		}
 	}
 
 	if count == 0 {
-		lessonsstr += "\n Приказано чилибасить."
+		lessonsString += "\n Приказано чилибасить."
 	}
 
-	return lessonsstr
+	return lessonsString
 }
 
-func (m *ScheduleMaker) CreateTomorrowSchedule(lessons []models.Lesson, group string, is_numerator bool) string {
+func (m *ScheduleMaker) CreateTomorrowSchedule(lessons []models.Lesson, group string, isNumerator bool) string {
 	sort.SliceStable(lessons, func(i, j int) bool {
 		return lessons[i].StartAt < lessons[j].StartAt
 	})
 
-	tmdate := m.tomorrowDate()
-	var lessonsstr = fmt.Sprintf("Группа %s. %s %s\n", group, m.dayOfWeekRus(time.Now().AddDate(0, 0, 1).Weekday()), tmdate)
+	tomorrowDate := m.tomorrowDate()
+	var lessonsString = fmt.Sprintf("Группа %s. %s %s\n", group, m.dayOfWeekRus(time.Now().AddDate(0, 0, 1).Weekday()), tomorrowDate)
 
 	count := 0
 	day := int(time.Now().AddDate(0, 0, 1).Weekday())
 	log.Print(day)
 	if day == 1 {
-		is_numerator = !is_numerator
+		isNumerator = !isNumerator
 	}
 
-	if is_numerator {
+	if isNumerator {
 		for _, lesson := range lessons {
 			if lesson.Day == day && lesson.IsNumerator {
 				count += 1
-				lessonsstr += fmt.Sprintf("%d. %s - %s (%s)\n\t%s\n\tАуд: %s\n", count, lesson.StartAt[:5], lesson.EndAt[:5],
+				lessonsString += fmt.Sprintf("%d. %s - %s (%s)\n\t%s\n\tАуд: %s\n", count, lesson.StartAt[:5], lesson.EndAt[:5],
 					lesson.Type, lesson.Name, lesson.Cabinet)
 			}
 		}
@@ -73,17 +73,17 @@ func (m *ScheduleMaker) CreateTomorrowSchedule(lessons []models.Lesson, group st
 		for _, lesson := range lessons {
 			if lesson.Day == day && !lesson.IsNumerator {
 				count += 1
-				lessonsstr += fmt.Sprintf("%d. %s - %s (%s)\n\t%s\n\tАуд: %s\n", count, lesson.StartAt[:5], lesson.EndAt[:5],
+				lessonsString += fmt.Sprintf("%d. %s - %s (%s)\n\t%s\n\tАуд: %s\n", count, lesson.StartAt[:5], lesson.EndAt[:5],
 					lesson.Type, lesson.Name, lesson.Cabinet)
 			}
 		}
 	}
 
 	if count == 0 {
-		lessonsstr += "\n Приказано чилибасить."
+		lessonsString += "\n Приказано чилибасить."
 	}
 
-	return lessonsstr
+	return lessonsString
 }
 
 func (m *ScheduleMaker) CreateDailySchedule(lessons []models.Lesson, group string, day int) string {
@@ -91,26 +91,34 @@ func (m *ScheduleMaker) CreateDailySchedule(lessons []models.Lesson, group strin
 		return lessons[i].StartAt < lessons[j].StartAt
 	})
 
-	var lessons_even = fmt.Sprintf("Группа %s. \n%s", group, "\U0001F976Числитель:\n")
-	var lessons_odd = "\n\U0001F975Знаменатель:\n"
+	var lessonsEven = fmt.Sprintf("Группа %s. \n%s", group, "\U0001F976Числитель:\n")
+	var lessonsOdd = "\n\U0001F975Знаменатель:\n"
 
-	count_e := 1
-	count_o := 1
+	countEven := 1
+	countOdd := 1
 
 	for _, lesson := range lessons {
 		if lesson.Day == day && lesson.IsNumerator {
-			lessons_even += fmt.Sprintf("%d. %s - %s (%s)\n\t%s\n\tАуд: %s\n", count_e, lesson.StartAt[:5], lesson.EndAt[:5],
+			countEven += 1
+			lessonsEven += fmt.Sprintf("%d. %s - %s (%s)\n\t%s\n\tАуд: %s\n", countEven, lesson.StartAt[:5], lesson.EndAt[:5],
 				lesson.Type, lesson.Name, lesson.Cabinet)
-			count_e = count_e + 1
 		}
 		if lesson.Day == day && !lesson.IsNumerator {
-			lessons_odd += fmt.Sprintf("%d. %s - %s (%s)\n\t%s\n\tАуд: %s\n", count_o, lesson.StartAt[:5], lesson.EndAt[:5],
+			countOdd += 1
+			lessonsOdd += fmt.Sprintf("%d. %s - %s (%s)\n\t%s\n\tАуд: %s\n", countOdd, lesson.StartAt[:5], lesson.EndAt[:5],
 				lesson.Type, lesson.Name, lesson.Cabinet)
-			count_o = count_o + 1
 		}
 	}
 
-	return lessons_even + lessons_odd
+	if countEven == 0 {
+		lessonsEven += "\n Приказано чилибасить."
+	}
+
+	if countOdd == 0 {
+		lessonsOdd += "\n Приказано чилибасить."
+	}
+
+	return lessonsEven + lessonsOdd
 }
 
 func (m *ScheduleMaker) currentDate() string {
