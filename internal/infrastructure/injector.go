@@ -5,9 +5,11 @@ import (
 	tb "gopkg.in/tucnak/telebot.v2"
 	"net/http"
 	"schbot/internal/config"
-	"schbot/internal/db"
-	"schbot/internal/handles"
+	"schbot/internal/handles_controllers"
+	"schbot/internal/handles_repos"
+	"schbot/internal/handles_services"
 	"schbot/internal/interfaces"
+	"schbot/internal/schedule_maker"
 )
 
 var env *environment
@@ -18,23 +20,28 @@ type environment struct {
 	client   *http.Client
 	bot      *tb.Bot
 	dbClient interfaces.IDBHandler
-	dbMagic  interfaces.IDbMagic
 }
 
 type IInjector interface {
-	InjectHandles() handles.Handles
+	InjectHandles() handles_controllers.HandlesController
 }
 
-func (e *environment) InjectHandles() handles.Handles {
-	return handles.Handles{
-		Log:       e.logger,
-		Bot:       e.bot,
-		Config:    e.cfg,
-		Client:    e.client,
-		DBHandler: e.dbClient,
-		DbMagic: &db.DMagic{
-			Log:    e.logger,
-			Config: e.cfg,
+func (e *environment) InjectHandles() handles_controllers.HandlesController {
+	return handles_controllers.HandlesController{
+		Log:    e.logger,
+		Bot:    e.bot,
+		Config: e.cfg,
+		HandlesService: &handles_services.HandleService{
+			Log:           e.logger,
+			Config:        e.cfg,
+			Client:        e.client,
+			DBHandler:     e.dbClient,
+			ScheduleMaker: &schedule_maker.ScheduleMaker{},
+			HandlesRepo: &handles_repos.HandlesRepo{
+				Log:    e.logger,
+				Config: e.cfg,
+				Client: e.client,
+			},
 		},
 	}
 }

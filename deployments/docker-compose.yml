@@ -7,7 +7,7 @@ services:
       context: ./..
       dockerfile: deployments/Dockerfile
     env_file:
-      - ../configs/config.env
+      - ../configs/configs.env
     ports:
       - ${APPLICATION_PORT:-8080}:8080
     networks:
@@ -16,6 +16,8 @@ services:
   postgres:
     image: postgres:latest
     container_name: db
+    ports:
+      - "5434:5434"
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin

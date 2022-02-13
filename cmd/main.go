@@ -28,7 +28,7 @@ func init() {
 
 	cfg = config.New()
 	if err != nil {
-		log.Fatalf("config init error: %s", err)
+		log.Fatalf("configs init error: %s", err)
 	}
 	log.Infof("Config loaded:\n%+v", cfg)
 
@@ -56,7 +56,8 @@ func main() {
 	b.Handle("/sh", hands.GetDailySchedule)
 	b.Handle("/tsh", hands.GetTodaySchedule)
 	b.Handle("/setg", hands.SetChatGroup)
-	b.Handle("/today", hands.TodayScheduleInGroup)
+	b.Handle("/today", hands.GetTodayScheduleInChat)
+	b.Handle("/tomorrow", hands.GetTomorrowScheduleInChat)
 
 	b.Start()
 }
